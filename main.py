@@ -1,5 +1,6 @@
 import sys
-import player, scanner
+import player
+import scanner
 
 musicDirectory = "C:/Users/mattb/Documents/Soulseek Downloads/complete"
 
@@ -8,17 +9,19 @@ def programStart():
     albumNames, mp3Files = scanner.listFolderContents(musicDirectory)
     print("Scan complete.\n")
 
-    songOrAlbumInput = input("Select 1 to search for an Album and 2 to Search for a song directly\n")
-    if songOrAlbumInput == "1":
-        songName = player.albumLookUp(albumNames)
-    elif songOrAlbumInput == "2":
-        _, songName, songPath = player.songLookUp(mp3Files)
-        player.recieveMusicFiles(songName, songPath)
-    else: 
-        print("Please enter a valid input\nExiting...")
-        sys.exit()
-    
-    return
+    while True:  # Input loop
+        songOrAlbumInput = input("Select 1 to search for an Album, 2 to search for a song, or 'q' to exit: ").strip().lower()
+        
+        if songOrAlbumInput == "1":
+            player.albumLookUp(albumNames)
+        elif songOrAlbumInput == "2":
+            _, songName, songPath = player.songLookUp(mp3Files)
+            player.recieveMusicFiles(songName, songPath)
+        elif songOrAlbumInput == "q":
+            print("Exiting program.")
+            break  # Exit the loop
+        else: 
+            print("Please enter a valid input.")
 
 if __name__ == "__main__":
     programStart()

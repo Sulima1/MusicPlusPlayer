@@ -1,6 +1,8 @@
 from pydub import AudioSegment
 from pydub.playback import play
 import simpleaudio as sa
+import scanner
+import sys
 
 
 def recieveMusicFiles(songName, songPath):
@@ -26,6 +28,13 @@ def songLookUp(mp3Files):
 
     return results, songName, songPath
 
+
+#recieves list of song tuples (songname, filepath)
+def playQueue(SongQueue):
+    for songName, songPath in SongQueue:
+        recieveMusicFiles(songName, songPath)
+    return
+
 def albumLookUp(albumNames):
     albumNameQuery = input("Enter the album name you would like to look at: ")
 
@@ -35,8 +44,33 @@ def albumLookUp(albumNames):
         albumNameLower = album.lower()
         if query in albumNameLower:
             results.append((album, path))
-    if results:
-        albumName, albumPath = results[0]
+
+    #change output depending on albums found
+    if len(results) > 1:
+        return
+    
+    elif len(results) == 1:
+        albumName, albumPath = results[0] 
+        _, songsInAlbum = scanner.listFolderContents(albumPath)
+
+        songOrQueue = input("Type 1 if you want to play the whole album, or 2 if you want to list the songs").strip().lower()
+
+        #if user wants to play whole album
+        if songOrQueue =="1":
+            playQueue(songsInAlbum)
+
+        #play a specific song
+        elif songOrQueue == "2":
+            print("Songs found in " + albumName)
+            for song, _ in songsInAlbum:
+                print(song)
+            #call songLookUp on this list of mp3 files
+            songLookUp(songsInAlbum)
+
+        else:
+            print("please enter a valid input.")
+            sys.exit()
+
     else:
-        print("No matching songs found.")
+        print("No albums found with that keyword.")
     return

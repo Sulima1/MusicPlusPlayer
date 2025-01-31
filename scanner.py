@@ -1,8 +1,5 @@
 import os
 
-musicDirectory = "C:/Users/mattb/Documents/Soulseek Downloads/complete"
-
-
 def listFolderContents(musicDirectory):
 
     mp3Files = []
@@ -18,7 +15,5 @@ def listFolderContents(musicDirectory):
     
     return albumNames, mp3Files
     
-
-albumNames, mp3Files = listFolderContents(musicDirectory)
 
 
