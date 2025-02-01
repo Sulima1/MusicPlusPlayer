@@ -2,15 +2,51 @@ from pydub import AudioSegment
 from pydub.playback import play
 import simpleaudio as sa
 import scanner
-import sys
+import time
+import threading
 
 
-def recieveMusicFiles(songName, songPath):
-    print("NOW PLAYING: " + songName)
-    mp3File = AudioSegment.from_file(file=songPath, format="mp3") 
-    play(mp3File)
+def playSong(songPath):
+    song = AudioSegment.from_file(songPath, format="mp3")
+
+    rawData = song.raw_data
+    sampleRate = song.frame_rate
+    channels = song.channels
+    sampleWidth = song.sample_width
+
+    #play the audio
+    waveObj = sa.WaveObject(rawData, num_channels=channels, bytes_per_sample=sampleWidth, sample_rate=sampleRate)
+
+    return waveObj.play()
+
+#recieves songname and filepath to play the music
+def recieveMusicFiles(songName, songPath, songQueue):
+    print("NOW PLAYING: " + songName + "\n")
+
+    playObj = playSong(songPath)
+
+    while playObj.is_playing():
+        trackControl = input("Press 's' to skip or 'q' to quit: ").strip().lower()
+
+        if trackControl == "s":
+            playObj.stop()
+            print("Skipping song...\n")
+            break
+
+        elif trackControl == "q":
+            playObj.stop()
+            print("quitting.\n")
+            return
+        else:
+            print("invalid input, try again\n")
+    
+    #Move to next song in the queue if possible
+    if songQueue:
+        nextSong = songQueue.pop(0)
+        recieveMusicFiles(nextSong[0], nextSong[1], songQueue)
     return
 
+#searches for song in list of tuple (songname, filepath)
 def songLookUp(mp3Files):
     songNameQuery = input("Enter the song name you would like to play: ")
 
@@ -22,19 +58,13 @@ def songLookUp(mp3Files):
             results.append((song, path))
     if results:
         songName, songPath = results[0]
-        recieveMusicFiles(songName, songPath)
+        recieveMusicFiles(songName, songPath, [])
     else:
         print("No matching songs found.")
 
     return results, songName, songPath
 
-
-#recieves list of song tuples (songname, filepath)
-def playQueue(SongQueue):
-    for songName, songPath in SongQueue:
-        recieveMusicFiles(songName, songPath)
-    return
-
+#Similar to songLookUp recieves a tuple of albumNames (AlbumName, path) for lookup
 def albumLookUp(albumNames):
     albumNameQuery = input("Enter the album name you would like to look at: ")
 
@@ -57,7 +87,7 @@ def albumLookUp(albumNames):
 
         #if user wants to play whole album
         if songOrQueue =="1":
-            playQueue(songsInAlbum)
+            recieveMusicFiles(songsInAlbum[0][0], songsInAlbum[0][1], songsInAlbum[1:])
 
         #play a specific song
         elif songOrQueue == "2":
