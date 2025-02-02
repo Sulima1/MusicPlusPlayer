@@ -47,7 +47,7 @@ def recieveMusicFiles(songName, songPath, songQueue):
     return
 
 #searches for song in list of tuple (songname, filepath)
-def songLookUp(mp3Files):
+def songLookUp(mp3Files): #Need to convert this to an ITEM lookup so it can work for both SONGS and ALBUMS
     songNameQuery = input("Enter the song name you would like to play: ")
 
     query = songNameQuery.lower()
@@ -77,7 +77,12 @@ def albumLookUp(albumNames):
 
     #change output depending on albums found
     if len(results) > 1:
-        return
+        print("Which album are you interested in playing?")
+        for albumName, albumPath in results:
+            print(albumName)
+        print("\n")
+        albumQuery = input("")
+
     
     elif len(results) == 1:
         albumName, albumPath = results[0] 
