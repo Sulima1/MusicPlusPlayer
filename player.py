@@ -3,16 +3,16 @@ from pydub.playback import play
 import simpleaudio as sa
 import scanner
 import time
-import threading
 
 
-def playSong(songPath):
+def playSong(songPath, position=0):
     song = AudioSegment.from_file(songPath, format="mp3")
+    songSegment = song[position:]
 
-    rawData = song.raw_data
-    sampleRate = song.frame_rate
-    channels = song.channels
-    sampleWidth = song.sample_width
+    rawData = songSegment.raw_data
+    sampleRate = songSegment.frame_rate
+    channels = songSegment.channels
+    sampleWidth = songSegment.sample_width
 
     #play the audio
     waveObj = sa.WaveObject(rawData, num_channels=channels, bytes_per_sample=sampleWidth, sample_rate=sampleRate)
@@ -23,15 +23,28 @@ def playSong(songPath):
 def recieveMusicFiles(songName, songPath, songQueue):
     print("NOW PLAYING: " + songName + "\n")
 
+    startTime = time.time()
     playObj = playSong(songPath)
 
     while playObj.is_playing():
         trackControl = input("Press 's' to skip or 'q' to quit: ").strip().lower()
+        elapsedTime = (time.time() - startTime) * 1000
+        position = int(elapsedTime)
 
         if trackControl == "s":
             playObj.stop()
             print("Skipping song...\n")
             break
+        elif trackControl == "p":
+            playObj.stop()
+            print(f"pausing at {position / 1000:.2f} seconds. Press 'p' to resume.\n")
+            
+            while input().strip().lower() != "p":
+                pass
+            
+            print(f"Resume from {position / 1000:.2f} seconds")
+            playObj = playSong(songPath, position)
+            startTime = time.time()
 
         elif trackControl == "q":
             playObj.stop()
