@@ -47,45 +47,44 @@ def recieveMusicFiles(songName, songPath, songQueue):
     return
 
 #searches for song in list of tuple (songname, filepath)
-def songLookUp(mp3Files): #Need to convert this to an ITEM lookup so it can work for both SONGS and ALBUMS
-    songNameQuery = input("Enter the song name you would like to play: ")
-
-    query = songNameQuery.lower()
-    results = []
-    for song, path in mp3Files:
-        songNameLower = song.lower()
-        if query in songNameLower:
-            results.append((song, path))
-    if results:
-        songName, songPath = results[0]
-        recieveMusicFiles(songName, songPath, [])
+def itemLookUp(mp3Files, songORalbum): #Need to convert this to an ITEM lookup so it can work for both SONGS and ALBUMS
+    if songORalbum:
+        itemQuery = input("Enter the song name you would like to play: ")
     else:
-        print("No matching songs found.")
+        itemQuery = input("Enter the album name you would like to look at: ")
 
-    return results, songName, songPath
-
-#Similar to songLookUp recieves a tuple of albumNames (AlbumName, path) for lookup
-def albumLookUp(albumNames):
-    albumNameQuery = input("Enter the album name you would like to look at: ")
-
-    query = albumNameQuery.lower()
+    query = itemQuery.lower()
     results = []
-    for album, path in albumNames:
-        albumNameLower = album.lower()
-        if query in albumNameLower:
-            results.append((album, path))
+    for item, path in mp3Files:
+        itemNameLower = item.lower()
+        if query in itemNameLower:
+            results.append((item, path))
+
+    if songORalbum == False:
+        albumHandler(results)
+    else:
+        if results:
+            songName, songPath = results[0]
+            recieveMusicFiles(songName, songPath, [])
+        else:
+            print("No matching songs found.")
+
+        return results, songName, songPath
+
+#Handles outputs of itemLookUp inputs as a tuple (AlbumName, path) for lookup
+def albumHandler(albumNames):
 
     #change output depending on albums found
-    if len(results) > 1:
+    if len(albumNames) > 1:
         print("Which album are you interested in playing?")
-        for albumName, albumPath in results:
+        for albumName, albumPath in albumNames:
             print(albumName)
         print("\n")
         albumQuery = input("")
 
     
-    elif len(results) == 1:
-        albumName, albumPath = results[0] 
+    elif len(albumNames) == 1:
+        albumName, albumPath = albumNames[0] 
         _, songsInAlbum = scanner.listFolderContents(albumPath)
 
         songOrQueue = input("Type 1 if you want to play the whole album, or 2 if you want to list the songs").strip().lower()
@@ -100,7 +99,7 @@ def albumLookUp(albumNames):
             for song, _ in songsInAlbum:
                 print(song)
             #call songLookUp on this list of mp3 files
-            songLookUp(songsInAlbum)
+            itemLookUp(songsInAlbum, songORalbum=True)
 
         else:
             print("please enter a valid input.")
